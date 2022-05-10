@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Cursor> 
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 initLoaders()
@@ -70,7 +71,7 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Cursor> 
      }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        val contentURI = ContactsContract.Contacts.CONTENT_URI;
+        val contentURI = ContactsContract.Contacts.CONTENT_URI
         return CursorLoader(
             this, contentURI, arrayOf(
                 ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
