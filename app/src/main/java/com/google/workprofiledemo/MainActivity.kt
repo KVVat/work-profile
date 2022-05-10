@@ -4,6 +4,7 @@ import android.Manifest
 
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.widget.Toast
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 const val PERMISSIONS_REQUEST_READ_CONTACTS = 1
 const val PERSONAL_CONTACTS_LOADER_ID = 0
+const val WORK_CONTACTS_LOADER_ID = 1
 
 class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Cursor> {
     private lateinit var recyclerView: RecyclerView
@@ -68,10 +70,24 @@ class MainActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Cursor> 
 
     private fun initLoaders() {
         LoaderManager.getInstance(this).initLoader(PERSONAL_CONTACTS_LOADER_ID, null, this)
+        LoaderManager.getInstance(this).initLoader(WORK_CONTACTS_LOADER_ID, null, this)
      }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        val contentURI = ContactsContract.Contacts.CONTENT_URI
+        val nameFilter = Uri.encode("a") // names that start with W
+        val contentURI = when (id) {
+            PERSONAL_CONTACTS_LOADER_ID -> ContactsContract.Contacts.CONTENT_URI
+            else -> {
+                ContactsContract.Contacts.ENTERPRISE_CONTENT_FILTER_URI
+                    .buildUpon()
+                    .appendPath(nameFilter)
+                    .appendQueryParameter(
+                        ContactsContract.DIRECTORY_PARAM_KEY,
+                        ContactsContract.Directory.ENTERPRISE_DEFAULT.toString()
+                    )
+                    .build()
+            }
+        }
         return CursorLoader(
             this, contentURI, arrayOf(
                 ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
